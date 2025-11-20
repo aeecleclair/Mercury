@@ -25,17 +25,14 @@ class Bot extends Client {
 				IntentsBitField.Flags.Guilds,
 				IntentsBitField.Flags.GuildMessages,
 				IntentsBitField.Flags.GuildMembers,
-				IntentsBitField.Flags.GuildBans,
 				IntentsBitField.Flags.GuildMessageReactions,
 				IntentsBitField.Flags.GuildIntegrations,
 				IntentsBitField.Flags.GuildWebhooks,
-				IntentsBitField.Flags.GuildEmojisAndStickers,
 				IntentsBitField.Flags.GuildVoiceStates,
 				IntentsBitField.Flags.DirectMessages,
 				IntentsBitField.Flags.DirectMessageReactions,
 				IntentsBitField.Flags.DirectMessageTyping,
 				IntentsBitField.Flags.GuildScheduledEvents,
-				IntentsBitField.Flags.GuildPresences,
 				IntentsBitField.Flags.GuildMessageTyping,
 				IntentsBitField.Flags.GuildMessages
 			]

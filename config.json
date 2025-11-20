@@ -1,8 +1,7 @@
 {
 	"bot": {
-		"token": "",
 		"ownersIDs": ["OWNER_ID"]
 	},
 	"mainLang": "fr",
-	"testGuild": "490839183275982849"
+	"testGuild": "1071821884531945543"
 }
