@@ -3,5 +3,6 @@
 		"ownersIDs": ["OWNER_ID"]
 	},
 	"mainLang": "fr",
-	"testGuild": "1071821884531945543"
+	"testGuild": "1071821884531945543",
+	"hyperionUrl": "https://hyperion.myecl.fr"
 }
