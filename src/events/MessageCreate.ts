@@ -1,25 +1,23 @@
 "use strict";
 
 import { Events, Message } from "discord.js";
-import CommandService from "../services/CommandService";
 import DiscordEvent from "../utils/DiscordEvent";
 import Bot from "../../main";
+import ParsingService from "../services/ParsingService";
 
 /*
-L'évent interactionCreate n'est pas long car en faites les tâches sont répartis dans le dossier services prenez exemple sur CommandService ;)
+L'évent messageCreate n'est pas long car en faites les tâches sont répartis dans le dossier services prenez exemple sur CommandService ;)
 */
 
 export default class MessageCreate extends DiscordEvent<Events.MessageCreate> {
-	commands: CommandService;
+	parsings: ParsingService;
 	constructor(client: Bot) {
 		super(client, Events.MessageCreate);
 		this.client = client;
-		this.commands = new CommandService(this.client);
+		this.parsings = new ParsingService(this.client);
 	}
 
 	async run(message: Message) {
-
-		if (message.author.bot) return;
-		
+		await this.parsings.handle(message);
 	}
 }
