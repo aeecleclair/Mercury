@@ -34,7 +34,8 @@ class Bot extends Client {
 				IntentsBitField.Flags.DirectMessageTyping,
 				IntentsBitField.Flags.GuildScheduledEvents,
 				IntentsBitField.Flags.GuildMessageTyping,
-				IntentsBitField.Flags.GuildMessages
+				IntentsBitField.Flags.GuildMessages,
+				IntentsBitField.Flags.MessageContent
 			]
 		});
 		this.config = config; // récupérer la config

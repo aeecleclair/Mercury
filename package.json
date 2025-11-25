@@ -7,7 +7,7 @@
 		"test": "tsc --noEmit",
 		"compile": "tsc",
 		"watch": "tsc --watch",
-		"start": "tsc && node dist/shards.js",
+		"start": "tsc && node dist/index.js",
 		"entrypoint": "npx prisma migrate deploy && npx prisma generate && tsc && node dist/index.js",
 		"dev": "node dist/index.js",
 		"lint": "eslint .",

@@ -4,4 +4,5 @@ export interface ConfigFile {
 	};
 	mainLang: string;
 	testGuild: string;
+	hyperionUrl: string;
 }
