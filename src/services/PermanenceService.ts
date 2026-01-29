@@ -12,6 +12,7 @@ class CommandService {
 	}
 
     async handle() {
+        console.log("Scheduling permanence messages...");
         // Schedule a task to run every Saturday at midnight as well
 		cron.schedule("0 0 * * 6", async () => {
 			await this.handleRemindMessage();
