@@ -15,4 +15,8 @@ COPY src src/
 COPY main.ts .
 COPY index.ts .
 
-CMD ["npm", "run", "entrypoint"]
+RUN npx prisma migrate deploy
+RUN npx prisma generate
+RUN tsc
+
+CMD ["node", "dist/index.js"]
