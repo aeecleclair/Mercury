@@ -1,4 +1,4 @@
-FROM 25-trixie-slim
+FROM node:25-trixie-slim
 
 WORKDIR /mercury
 
