@@ -27,6 +27,10 @@ export default class SetLogsChannel extends Command {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "availability",
                 description: "Set your availability status for permanence.",
+            }, {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "list",
+                description: "List all users' availability for permanence.",
             }]
         });
     }
@@ -113,6 +117,27 @@ export default class SetLogsChannel extends Command {
             });
 
 
+        } else if (ctx.args.getSubcommand() === "list") {
+            const availabilities = await prisma.availability.findMany();
+            const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+
+            // We will display the list of users with their availability each day
+            // User1 : :white_check_mark: :x: :white_check_mark: :x: :white_check_mark: ...
+
+            let description = "";
+            const users = new Set(availabilities.map(a => a.userId));
+            for (const userId of users) {
+                const userAvailabilities = availabilities.filter(a => a.userId === userId).map(a => a.day);
+                const availabilityString = days.map((day, index) => userAvailabilities.includes(index) ? "✅" : "❌").join(" ");
+                description += `<@${userId}> : ${availabilityString}\n`;
+            }
+            return ctx.reply({
+                embeds: [{
+                    title: "Disponibilités des utilisateurs",
+                    description: description || "Aucune disponibilité enregistrée."
+                }],
+                ephemeral: true
+            });
         }
 
 

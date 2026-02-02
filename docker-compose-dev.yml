@@ -1,0 +1,11 @@
+services:
+  mercury:
+    container_name: mercury-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./.env:/mercury/.env
+      - ./config.json:/mercury/config.json
+      - ./prisma:/mercury/prisma
+
