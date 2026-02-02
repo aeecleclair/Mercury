@@ -1,6 +1,6 @@
 "use strict";
 
-import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ChatInputCommandInteraction, ComponentType } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, ChatInputCommandInteraction, ComponentType, MessageFlags } from "discord.js";
 import Command from "../../utils/Command";
 import { CachedGuildContext } from "../../utils/Context";
 import prisma from "../../utils/PrismaClient";
@@ -91,7 +91,7 @@ export default class SetLogsChannel extends Command {
             });
             collector.on("collect", async (interaction) => {
                 if (interaction.user.id !== ctx.author.id) {
-                    return interaction.reply({ content: "Vous ne pouvez pas interagir avec ce menu.", ephemeral: true });
+                    return interaction.reply({ content: "Vous ne pouvez pas interagir avec ce menu.", flags: [MessageFlags.Ephemeral] });
                 }
                 const selectedDays = interaction.values.map(v => parseInt(v));
                 await prisma.availability.deleteMany({
@@ -136,7 +136,7 @@ export default class SetLogsChannel extends Command {
                     title: "Disponibilités des utilisateurs",
                     description: description || "Aucune disponibilité enregistrée."
                 }],
-                ephemeral: true
+                flags: [MessageFlags.Ephemeral]
             });
         }
 
