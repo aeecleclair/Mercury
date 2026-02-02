@@ -2,7 +2,9 @@ FROM node:25-trixie-slim
 
 WORKDIR /mercury
 
-COPY package*.json ./
+COPY tsconfig.json ./
+COPY package.json ./
+COPY package-lock.json ./
 
 RUN npm install
 
