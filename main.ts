@@ -1,7 +1,7 @@
 "use strict";
 
 // On récupère des classes ici
-import { Client, IntentsBitField, Partials } from "discord.js";
+import { Client, GatewayIntentBits, IntentsBitField, Partials } from "discord.js";
 import CommandsManager from "./src/utils/CommandsManager";
 import EventsManager from "./src/utils/EventsManager.js";
 import Logger from "./src/utils/Logger";
@@ -34,7 +34,11 @@ class Bot extends Client {
 				IntentsBitField.Flags.DirectMessageTyping,
 				IntentsBitField.Flags.GuildScheduledEvents,
 				IntentsBitField.Flags.GuildMessageTyping,
-				IntentsBitField.Flags.GuildMessages
+				IntentsBitField.Flags.GuildMessages,
+				GatewayIntentBits.Guilds,
+				GatewayIntentBits.GuildMessages,
+				GatewayIntentBits.MessageContent,
+				GatewayIntentBits.GuildMembers
 			]
 		});
 		this.config = config; // récupérer la config
