@@ -18,11 +18,8 @@ export default class MessageCreate extends DiscordEvent<Events.MessageCreate> {
 	}
 
 	async run(message: Message) {
-		if (!message.author.bot) {
-			const channel = message.channel;
-			if (channel.isSendable()) {
-				channel.send("test");
-			}
-		}
+
+		if (message.author.bot) return;
+		
 	}
 }
