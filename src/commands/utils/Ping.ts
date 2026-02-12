@@ -8,8 +8,7 @@ export default class Ping extends Command {
 			type: ApplicationCommandType.ChatInput,
 			name: "ping",
 			category: "utils",
-			description: "Test the latency of the bot to Discord.",
-			examples: ["ping"]
+			description: "Test the latency of the bot to Discord."
 		});
 	}
 
