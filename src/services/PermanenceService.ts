@@ -2,17 +2,17 @@
 
 import Bot from "../../main";
 import prisma from "../utils/PrismaClient";
-import { EmbedBuilder, TextChannel, User } from "discord.js";
+import { EmbedBuilder, TextChannel } from "discord.js";
 import cron from "node-cron";
 
-function shuffle(array: any[]) {
+function shuffle(array: string[]) {
 	// Fisher-Yates shuffle algorithm
 	let currentIndex = array.length;
 
 	// While there remain elements to shuffle...
 	while (currentIndex != 0) {
 		// Pick a remaining element...
-		let randomIndex = Math.floor(Math.random() * currentIndex);
+		const randomIndex = Math.floor(Math.random() * currentIndex);
 		currentIndex--;
 
 		// And swap it with the current element.
@@ -21,7 +21,7 @@ function shuffle(array: any[]) {
 }
 
 function getRandomIndex(probabilities: number[]) {
-	var random = Math.random() * probabilities.reduce((a, v) => a + v, 0);
+	let random = Math.random() * probabilities.reduce((a, v) => a + v, 0);
 
 	for (let i = 0; i < probabilities.length; i++) {
 		if (random < probabilities[i]) return i;
@@ -53,7 +53,7 @@ class CommandService {
 		);
 		// Schedule a task to run every Sunday at midnight
 		cron.schedule(
-			"* * * * *",
+			"0 0 * * 0",
 			async () => {
 				await this.handlePermsMessage();
 			},
@@ -114,7 +114,7 @@ class CommandService {
 			numberOfAvailableDaysToUsers[userToNumberOfAvailableDays[userId] - 1].push(userId);
 		}
 
-		for (let users of numberOfAvailableDaysToUsers) shuffle(users);
+		for (const users of numberOfAvailableDaysToUsers) shuffle(users);
 
 		const userToBinaryAvailability = userIds.reduce(
 			(a: { [userId: string]: number[] }, v) => ({ ...a, [v]: [0, 0, 0, 0, 0] }),
@@ -136,9 +136,9 @@ class CommandService {
 					maxUsersPerDay++;
 					userPossibleDays = userToBinaryAvailability[userId];
 				}
-				dayToAssignedUsers[
-					getRandomIndex(elementWiseMultiplication(userToBinaryAvailability[userId], userPossibleDays))
-				].push(userId);
+				dayToAssignedUsers[getRandomIndex(elementWiseMultiplication(daysToProba, userPossibleDays))].push(
+					userId
+				);
 			}
 		}
 
