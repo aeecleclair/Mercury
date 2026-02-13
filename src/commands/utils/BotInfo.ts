@@ -11,7 +11,6 @@ export default class Botinfo extends Command {
 			name: "botinfo",
 			category: "utils",
 			description: "Displays the bot informations.",
-			options: [],
 			testCmd: true
 		});
 	}
