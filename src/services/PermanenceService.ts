@@ -154,7 +154,10 @@ class CommandService {
 			console.log(`${dayNames[i]}: ${fieldValue}`);
 		}
 
-		await channel.send({ embeds: [embed] });
+		await channel.send({
+			content: `<@&1438873534620504134>`, // @Mandat en fonction
+			embeds: [embed]
+		});
 	}
 }
 
