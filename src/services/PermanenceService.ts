@@ -5,6 +5,36 @@ import prisma from "../utils/PrismaClient";
 import { EmbedBuilder, TextChannel } from "discord.js";
 import cron from "node-cron";
 
+function shuffle(array: string[]) {
+	// Fisher-Yates shuffle algorithm
+	let currentIndex = array.length;
+
+	// While there remain elements to shuffle...
+	while (currentIndex != 0) {
+		// Pick a remaining element...
+		const randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		// And swap it with the current element.
+		[array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+	}
+}
+
+function getRandomIndex(probabilities: number[]) {
+	let random = Math.random() * probabilities.reduce((a, v) => a + v, 0);
+
+	for (let i = 0; i < probabilities.length; i++) {
+		if (random < probabilities[i]) return i;
+		random -= probabilities[i];
+	}
+	return probabilities.length - 1;
+}
+
+function elementWiseMultiplication(a: number[], b: number[]) {
+	if (a.length !== b.length) throw new Error("Arrays must be of the same length");
+	return a.map((val, index) => val * b[index]);
+}
+
 class CommandService {
 	client: Bot;
 	constructor(client: Bot) {
@@ -62,55 +92,43 @@ class CommandService {
 		const channel = discordGuild.channels.cache.get(guild.permanenceChannelId) as TextChannel;
 		if (!channel || !channel.isSendable()) return;
 
-		// Récupérer toutes les disponibilités
 		const availabilities = await prisma.availability.findMany();
 
-		// Grouper par jour
-		const dayAssignments: { [key: number]: string[] } = {
-			0: [],
-			1: [],
-			2: [],
-			3: [],
-			4: []
-		};
+		const userToNumberOfAvailableDays: { [userId: string]: number } = availabilities.reduce(
+			(a, v) => ({ ...a, [v.userId]: 0 }),
+			{}
+		);
+		for (const a of availabilities) userToNumberOfAvailableDays[a.userId]++;
+		const numberOfAvailableDaysToUsers: string[][] = [[], [], [], [], []];
+		for (const userId in userToNumberOfAvailableDays)
+			numberOfAvailableDaysToUsers[userToNumberOfAvailableDays[userId] - 1].push(userId);
+		for (const users of numberOfAvailableDaysToUsers) shuffle(users);
 
-		const usersByDay: { [key: number]: string[] } = {};
+		const userToBinaryAvailability = availabilities
+			.reduce((a: string[], v) => [...a, v.userId], [])
+			.reduce((a: { [userId: string]: number[] }, v) => ({ ...a, [v]: [0, 0, 0, 0, 0] }), {});
+		availabilities.map(a => (userToBinaryAvailability[a.userId][a.day] = 1));
 
-		// Regrouper les utilisateurs par jour
-		for (const availability of availabilities) {
-			if (!usersByDay[availability.day]) {
-				usersByDay[availability.day] = [];
-			}
-			usersByDay[availability.day].push(availability.userId);
-		}
+		const dayToAvailableUsers: string[][] = [[], [], [], [], []];
+		for (const a of availabilities) dayToAvailableUsers[a.day].push(a.userId.toString());
+		const daysToProba = dayToAvailableUsers.map(user => 1 / user.length);
 
-		// Suivre le nombre d'affectations par utilisateur
-		const userAssignmentCount: { [userId: string]: number } = {};
-
-		const days = [0, 1, 2, 3, 4];
-
-		for (const day of days) {
-			const availableUsers = usersByDay[day] || [];
-			if (availableUsers.length > 0) {
-				// Trier les utilisateurs par nombre d'affectations (priorité aux moins assignés)
-				const sortedUsers = availableUsers.sort((a, b) => {
-					const countA = userAssignmentCount[a] || 0;
-					const countB = userAssignmentCount[b] || 0;
-					// Si même nombre d'affectations, ordre aléatoire
-					if (countA === countB) return Math.random() - 0.5;
-					return countA - countB;
-				});
-
-				// Sélectionner 1-2 personnes parmi les moins assignées
-				const numToAssign = Math.min(2, sortedUsers.length);
-				const assigned = sortedUsers.slice(0, numToAssign);
-
-				dayAssignments[day] = assigned;
-
-				// Incrémenter le compteur pour chaque personne assignée
-				for (const userId of assigned) {
-					userAssignmentCount[userId] = (userAssignmentCount[userId] || 0) + 1;
+		let maxUsersPerDay = 1;
+		const dayToAssignedUsers: string[][] = [[], [], [], [], []];
+		for (const users of numberOfAvailableDaysToUsers) {
+			for (const userId of users) {
+				const availableSlotsPerDays = dayToAssignedUsers.map(users => maxUsersPerDay - users.length);
+				let userPossibleDays = elementWiseMultiplication(
+					userToBinaryAvailability[userId],
+					availableSlotsPerDays
+				);
+				if (userPossibleDays.reduce((a, v) => a + v, 0) === 0) {
+					maxUsersPerDay++;
+					userPossibleDays = userToBinaryAvailability[userId];
 				}
+				dayToAssignedUsers[getRandomIndex(elementWiseMultiplication(daysToProba, userPossibleDays))].push(
+					userId
+				);
 			}
 		}
 
@@ -118,13 +136,12 @@ class CommandService {
 		const dayNames = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 		const embed = new EmbedBuilder().setTitle("📅 Planning des permanences").setColor(0x5865f2).setTimestamp();
 
-		for (let i = 0; i < days.length; i++) {
-			const day = days[i];
-			const assigned = dayAssignments[day];
+		for (let i = 0; i < 5; i++) {
+			const assigned = dayToAssignedUsers[i];
 
 			let fieldValue = "";
 			if (assigned.length === 0) {
-				fieldValue = "*Personne assignée*";
+				fieldValue = "*Personne...*";
 			} else {
 				fieldValue = assigned.map(userId => `<@${userId}>`).join("\n");
 			}
@@ -134,6 +151,7 @@ class CommandService {
 				value: fieldValue,
 				inline: true
 			});
+			console.log(`${dayNames[i]}: ${fieldValue}`);
 		}
 
 		await channel.send({ embeds: [embed] });
