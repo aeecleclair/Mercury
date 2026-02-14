@@ -79,7 +79,6 @@ class CommandService {
 	}
 
 	async handlePermsMessage() {
-		console.log("Allez ça part");
 		const guild = await prisma.guild.findFirst({
 			where: {
 				id: "1071821884531945543"
@@ -93,37 +92,28 @@ class CommandService {
 		const channel = discordGuild.channels.cache.get(guild.permanenceChannelId) as TextChannel;
 		if (!channel || !channel.isSendable()) return;
 
-		// Récupérer toutes les disponibilités
 		const availabilities = await prisma.availability.findMany();
-		const userIds = availabilities.reduce((a: string[], v) => [...a, v.userId], []);
-
-		const dayToAvailableUsers: string[][] = [[], [], [], [], []];
-		for (const a of availabilities) {
-			dayToAvailableUsers[a.day].push(a.userId.toString());
-		}
 
 		const userToNumberOfAvailableDays: { [userId: string]: number } = availabilities.reduce(
 			(a, v) => ({ ...a, [v.userId]: 0 }),
 			{}
 		);
-		for (const a of availabilities) {
-			userToNumberOfAvailableDays[a.userId]++;
-		}
+		for (const a of availabilities) userToNumberOfAvailableDays[a.userId]++;
 		const numberOfAvailableDaysToUsers: string[][] = [[], [], [], [], []];
-		for (const userId in userToNumberOfAvailableDays) {
+		for (const userId in userToNumberOfAvailableDays)
 			numberOfAvailableDaysToUsers[userToNumberOfAvailableDays[userId] - 1].push(userId);
-		}
-
 		for (const users of numberOfAvailableDaysToUsers) shuffle(users);
 
-		const userToBinaryAvailability = userIds.reduce(
-			(a: { [userId: string]: number[] }, v) => ({ ...a, [v]: [0, 0, 0, 0, 0] }),
-			{}
-		);
+		const userToBinaryAvailability = availabilities
+			.reduce((a: string[], v) => [...a, v.userId], [])
+			.reduce((a: { [userId: string]: number[] }, v) => ({ ...a, [v]: [0, 0, 0, 0, 0] }), {});
 		availabilities.map(a => (userToBinaryAvailability[a.userId][a.day] = 1));
 
-		let maxUsersPerDay = 1;
+		const dayToAvailableUsers: string[][] = [[], [], [], [], []];
+		for (const a of availabilities) dayToAvailableUsers[a.day].push(a.userId.toString());
 		const daysToProba = dayToAvailableUsers.map(user => 1 / user.length);
+
+		let maxUsersPerDay = 1;
 		const dayToAssignedUsers: string[][] = [[], [], [], [], []];
 		for (const users of numberOfAvailableDaysToUsers) {
 			for (const userId of users) {
