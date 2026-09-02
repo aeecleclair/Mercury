@@ -76,8 +76,7 @@ class ManagementService {
         const message = await channel.send("Le bot a été redémarré et est maintenant opérationnel. Le dashboard sera actualisé toutes les 6 heures.");
 
         cron.schedule(
-			//`0 */${parseInt(process.env.DASHBOARD_REFRESH_INTERVAL_HOURS || "6")} * * *`,
-            "* * * * *",
+			`0 */${parseInt(process.env.DASHBOARD_REFRESH_INTERVAL_HOURS || "6")} * * *`,
 			async () => {
 				await this.fetchPlaneAndSaveInDb();
                 await this.postToChannel(message);
