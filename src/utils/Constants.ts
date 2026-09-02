@@ -3,5 +3,4 @@ export interface ConfigFile {
 		ownersIDs: string[];
 	};
 	mainLang: string;
-	testGuild: string;
 }

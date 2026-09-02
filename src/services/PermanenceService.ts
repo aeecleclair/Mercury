@@ -155,7 +155,7 @@ class CommandService {
 		}
 
 		await channel.send({
-			content: `<@&1438873534620504134>`, // @Mandat en fonction
+			content: "<@&1438873534620504134>", // @Mandat en fonction
 			embeds: [embed]
 		});
 	}

@@ -35,5 +35,4 @@ model ProjectModuleProgressMeasurement {
   targetDate DateTime
   totalWorkItems Int
   name String
-  description String?
 }

@@ -1,8 +1,11 @@
 import Bot from "../../main";
 
 import cron from "node-cron";
-import { fetchPlaneModuleSnapshots } from "../utils/PlaneModuleSnapshots";
+import { fetchPlaneModuleSnapshots } from "../utils/project_management/PlaneModuleSnapshots";
 import prisma from "../utils/PrismaClient";
+import { getProjectsDataFromDb } from "../utils/project_management/getFromDb";
+import { renderProjectsDashboard } from "../utils/project_management/ProjectsCanvas";
+import { Message } from "discord.js";
 
 class ManagementService {
 
@@ -12,7 +15,7 @@ class ManagementService {
         this._client = client;
     }
 
-    async getAndSaveInDb() {
+    async fetchPlaneAndSaveInDb() {
         const result = await fetchPlaneModuleSnapshots({
             apiKey: process.env.PLANE_API_KEY as string,
             projectId: process.env.PLANE_PROJECT_ID,
@@ -28,19 +31,56 @@ class ManagementService {
                     targetDate: new Date(snapshot.endDate),
                     totalWorkItems: snapshot.totalWorkItems,
                     name: snapshot.name,
-                    description: snapshot.description,
                 },
             });
         });
     }
 
+    async postToChannel(message: Message) {
+        const channelId = process.env.PROJECTS_DASHBOARD_CHANNEL_ID;
+        if (!channelId) {
+            console.error("PROJECTS_DASHBOARD_CHANNEL_ID is not set in the environment variables.");
+            return;
+        }
+        const channel = await this.client.channels.fetch(channelId);
+        if (!channel || !channel.isTextBased() || !channel.isSendable()) {
+            console.error("The channel ID provided is not a text-based/sendable channel.");
+            return;
+        }
+        const projectsData = await getProjectsDataFromDb();
+        const dashboardBuffer = await renderProjectsDashboard(projectsData);
+        const attachment = {
+            name: "projects_dashboard.png",
+            attachment: dashboardBuffer,
+        };
+        if (message && message.editable) {
+            await message.edit({ files: [ attachment ] });
+        } else {
+            await channel.send({ files: [attachment] });
+        }
+    }
+
     async handle() {
         console.log("Scheduling management messages...");
 
+        const channelId = process.env.PROJECTS_DASHBOARD_CHANNEL_ID;
+        if (!channelId) {
+            console.error("PROJECTS_DASHBOARD_CHANNEL_ID is not set in the environment variables.");
+            return;
+        }
+        const channel = await this.client.channels.fetch(channelId);
+        if (!channel || !channel.isTextBased() || !channel.isSendable()) {
+            console.error("The channel ID provided is not a text-based/sendable channel.");
+            return;
+        }
+        const message = await channel.send("Le bot a été redémarré et est maintenant opérationnel. Le dashboard sera actualisé toutes les 6 heures.");
+
         cron.schedule(
-			"0 0 * * *",
+			//`0 */${parseInt(process.env.DASHBOARD_REFRESH_INTERVAL_HOURS || "6")} * * *`,
+            "* * * * *",
 			async () => {
-				await this.getAndSaveInDb();
+				await this.fetchPlaneAndSaveInDb();
+                await this.postToChannel(message);
 			},
 			{ timezone: "Europe/Paris" }
 		);

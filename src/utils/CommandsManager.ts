@@ -72,7 +72,7 @@ class CommandsManager {
 
 		await this._globalCommands.set(
 			this._commands.filter(cmd => cmd.testCmd).map(cmd => cmd.commandData),
-			this._client.config.testGuild
+			process.env.TEST_GUILD_ID ? process.env.TEST_GUILD_ID : undefined,
 		);
 
 		await this._globalCommands.set(this._commands.filter(cmd => !cmd.testCmd).map(cmd => cmd.commandData));
