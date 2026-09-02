@@ -25,3 +25,15 @@ model Availability {
 
   @@unique([userId, day])
 }
+
+model ProjectModuleProgressMeasurement {
+  id        Int   @id @default(autoincrement())
+  moduleId  String
+  progress  Int   // Progress percentage (0-100)
+  date      DateTime @default(now())
+  startDate DateTime
+  targetDate DateTime
+  totalWorkItems Int
+  name String
+  description String?
+}
