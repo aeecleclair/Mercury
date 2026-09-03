@@ -4,6 +4,7 @@ import { Buffer } from "buffer";
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_PROJECTS = 10;
+const font_family = "DejaVu Sans";
 
 export interface ProjectData {
     name: string;
@@ -233,8 +234,10 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
     ctx.fillRect(0, 0, width, height);
 
     ctx.fillStyle = "#f8fafc";
-    ctx.font = "700 34px sans-serif";
+    ctx.font = `700 34px ${font_family} sans-serif`;
     ctx.fillText("Tableau de bord des projets", 42, 53);
+
+    console.log("Font", ctx.font);
 
     const metrics = visibleProjects.map((project) => getMetrics(project, now));
     const warnings = metrics.filter(
@@ -243,7 +246,7 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
     ).length;
 
     ctx.fillStyle = "#94a3b8";
-    ctx.font = "500 17px sans-serif";
+    ctx.font = `500 17px ${font_family} sans-serif`;
     ctx.fillText(
         `${visibleProjects.length} projet${visibleProjects.length > 1 ? "s" : ""} affiche${visibleProjects.length > 1 ? "s" : ""}`,
         43,
@@ -252,7 +255,7 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
 
     ctx.textAlign = "right";
     ctx.fillStyle = warnings > 0 ? "#fca5a5" : "#86efac";
-    ctx.font = "600 17px sans-serif";
+    ctx.font = `600 17px ${font_family} sans-serif`;
     ctx.fillText(
         warnings > 0
             ? `${warnings} projet${warnings > 1 ? "s" : ""} a surveiller`
@@ -264,7 +267,7 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
 
     if (visibleProjects.length === 0) {
         ctx.fillStyle = "#94a3b8";
-        ctx.font = "500 22px sans-serif";
+        ctx.font = `500 22px ${font_family} sans-serif`;
         ctx.textAlign = "center";
         ctx.fillText("Aucun projet a afficher", width / 2, 205);
         return canvas.encode("png");
@@ -287,11 +290,11 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
         roundedRect(ctx, cardX, cardY, 6, cardHeight, 3);
         ctx.fill();
 
-        ctx.font = "700 21px sans-serif";
+        ctx.font = `700 20px ${font_family} sans-serif`;
         ctx.fillStyle = "#f8fafc";
         ctx.fillText(truncateText(ctx, project.name, 250), 68, cardY + 34);
 
-        ctx.font = "500 14px sans-serif";
+        ctx.font = `500 14px ${font_family} sans-serif`;
         ctx.fillStyle = "#94a3b8";
         ctx.fillText(
             `${formatDate(project.startDate)}  -  ${formatDate(project.endDate)}`,
@@ -342,16 +345,16 @@ export async function renderProjectsDashboard(projects: ProjectData[]): Promise<
             ? `derniere mesure ${formatAge(metric.lastMeasurement.date, now)} (${formatDate(metric.lastMeasurement.date)})`
             : "aucune mesure disponible";
 
-        ctx.font = "500 14px sans-serif";
+        ctx.font = `500 14px ${font_family} sans-serif`;
         ctx.fillStyle = metric.status === "stalled" ? "#fca5a5" : "#94a3b8";
         ctx.fillText(`${deltaText}  |  ${measurementText}`, barX, cardY + 80);
 
         ctx.textAlign = "right";
-        ctx.font = "800 28px sans-serif";
+        ctx.font = `800 28px ${font_family} sans-serif`;
         ctx.fillStyle = "#f8fafc";
         ctx.fillText(`${Math.round(metric.progress * 100)} %`, 1090, cardY + 38);
 
-        ctx.font = "700 13px sans-serif";
+        ctx.font = `700 13px ${font_family} sans-serif`;
         const badgeWidth = Math.max(112, ctx.measureText(style.label).width + 28);
         roundedRect(ctx, 1090 - badgeWidth, cardY + 56, badgeWidth, 27, 14);
         ctx.globalAlpha = 0.18;

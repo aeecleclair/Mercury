@@ -73,7 +73,7 @@ class ManagementService {
             console.error("The channel ID provided is not a text-based/sendable channel.");
             return;
         }
-        const message = await channel.send("Le bot a été redémarré et est maintenant opérationnel. Le dashboard sera actualisé toutes les 6 heures.");
+        const message = await channel.send(`## 📋 Projects Dashboard\nLe bot a été redémarré et est maintenant opérationnel. Le dashboard sera actualisé toutes les ${process.env.DASHBOARD_REFRESH_INTERVAL_HOURS || "6"} heures.`);
 
         cron.schedule(
 			`0 */${parseInt(process.env.DASHBOARD_REFRESH_INTERVAL_HOURS || "6")} * * *`,

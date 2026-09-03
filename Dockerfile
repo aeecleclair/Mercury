@@ -15,6 +15,7 @@ COPY prisma/migrations prisma/migrations
 
 RUN npx prisma generate
 
+COPY assets assets/
 COPY main.ts .
 COPY index.ts .
 COPY src src/
