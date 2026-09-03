@@ -50,7 +50,7 @@ class AutoCompleteService {
 		if (!focusedValue) return;
 
 		if (command.name === "endpoint") {
-			const apiUrl = `${this._client.config.hyperionUrl}/openapi.json`;
+			const apiUrl = `${process.env.HYPERION_URL}/openapi.json`;
 			const data = await this.getCachedOrFetch(apiUrl);
 
 			const allPaths = Object.keys(data.paths);
