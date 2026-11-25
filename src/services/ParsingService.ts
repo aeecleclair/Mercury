@@ -39,12 +39,11 @@ const linkIssuePR = async (message: Message): Promise<string | null> => {
 
 const toGitHubLink = async (s: string) => {
 	const [repository, number] = s.split("#");
-	if (!process.env.GITHUB_TOKEN) return `[${s}](https://github.com/aeecleclair/${repository}/pull/${number})`;
 	// See https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
 	const res = await fetch(`https://api.github.com/repos/aeecleclair/${repository}/pulls/${number}`, {
 		headers: {
 			accept: "application/vnd.github+json",
-			authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+			authorization: process.env.GITHUB_TOKEN ? `Bearer ${process.env.GITHUB_TOKEN}` : undefined,
 			"X-GitHub-Api-Version": "2026-03-10"
 		}
 	});
