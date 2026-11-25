@@ -18,26 +18,38 @@ class ParsingService {
 
 		// Only 1 parsing for now
 		//this.client.logger.info(`Parsing ${parsing} executed by ${ctx.author.username}`);
-		const s = linkIssuePR(message);
+		const s = await linkIssuePR(message);
 		if (s) channel.send(s);
 	}
 }
 
-const linkIssuePR = (message: Message): string | null => {
-	const regexIssuePR = new RegExp(/\b(\w+#\d+)\b/, "g");
+const linkIssuePR = async (message: Message): Promise<string | null> => {
+	const regexIssuePR = new RegExp(/\b([\w-.]+#\d+)\b/, "g");
 	const matches = message.content.match(regexIssuePR);
 	if (!matches) return null;
 	switch (matches.length) {
 		case 1:
-			return toGitHubLink(matches[0]);
+			return await toGitHubLink(matches[0]);
 		default:
-			return matches.map(match => `* ${toGitHubLink(match)}`).join("\n");
+			return await Promise.all(matches.map(async match => `* ${await toGitHubLink(match)}`)).then(x =>
+				x.join("\n")
+			);
 	}
 };
 
-const toGitHubLink = (s: string) => {
+const toGitHubLink = async (s: string) => {
 	const [repository, number] = s.split("#");
-	return `[${s}](https://github.com/aeecleclair/${repository}/pull/${number})`;
+	// See https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+	const res = await fetch(`https://api.github.com/repos/aeecleclair/${repository}/pulls/${number}`, {
+		headers: {
+			accept: "application/vnd.github+json",
+			authorization: process.env.GITHUB_TOKEN ? `Bearer ${process.env.GITHUB_TOKEN}` : undefined,
+			"X-GitHub-Api-Version": "2026-03-10"
+		}
+	});
+	if (res.status >= 400) return `[${s}](https://github.com/aeecleclair/${repository}/pull/${number})`;
+	const PR = await res.json();
+	return `[${s} - ${PR.title}](${PR.url}) (+${PR.additions} -${PR.deletions}) par ${PR.user.login}`;
 };
 
 export default ParsingService;
